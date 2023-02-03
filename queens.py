@@ -1,110 +1,79 @@
 from itertools import product
 from itertools import combinations_with_replacement
+from collections import deque
+from copy import deepcopy
+from functools import partial
 
 
-class Board:
-    squares: dict[tuple[int, int], bool]
-    size: int
-    filled: list[tuple[int, int]]
+def iter_squares(board_size: int = 8):
 
-    def clear_board(self):
-        self.squares = {}
+    x_range = range(1, board_size + 1)
+    y_range = range(1, board_size + 1)
+    return product(x_range, y_range)
 
-        for x, y in product(range(1, self.size + 1), range(1, self.size + 1)):
-            self.squares[(x, y)] = False
 
-    def __iter__(self):
-        x_range = range(1, self.size + 1)
-        y_range = range(1, self.size + 1)
-        for x, y in product(x_range, y_range):
-            yield ((x, y), self.squares.get((x, y), False))
+def get_candidate_spots(prev_spots: list[tuple[int, int]], board_size: int = 8):
+    def diagonal_iter(anchor_pos):
 
-    def __init__(self, size: int = 8):
-        self.size = size
-        self.squares = {}
-        self.filled = []
-
-        self.clear_board()
-
-    def set_at(self, x: int, y: int):
-        self.squares[(x, y)] = True
-        self.filled.append((x, y))
-
-    def _check_horizontal(self, pos):
-        _, y = pos
-        for x_delta in range(1, self.size + 1):
-            if self.squares.get((x_delta, y)):
-                return True
-        return False
-
-    def _check_vertical(self, pos):
-        x, _ = pos
-        for y_delta in range(1, self.size + 1):
-            if self.squares.get((x, y_delta)):
-                return True
-        return False
-
-    def _diagonal_iter(self, anchor_pos):
         x_iter, y_iter = anchor_pos
-
         for x_step, y_step in combinations_with_replacement((-1, 1), 2):
-            while (0 < x_iter <= self.size) and (0 < y_iter <= self.size):
+            while (0 < x_iter <= board_size) and (0 < y_iter <= board_size):
                 x_iter += x_step
                 y_iter += y_step
                 yield (x_iter, y_iter)
 
             x_iter, y_iter = anchor_pos
 
-    def _check_diagonal(self, pos):
-        for check_pos in self._diagonal_iter(pos):
-            if self.squares.get(check_pos):
-                return True
-        return False
+    def check_diagonal(pos):
+        for check_pos in diagonal_iter(pos):
+            if check_pos in prev_spots:
+                return False
+        return True
 
-    def add_queen(self):
-        for pos, val in self.__iter__():
-            if val or pos in self.filled:
-                continue
-            if self._check_horizontal(pos):
-                continue
+    visited_x = [t[0] for t in prev_spots]
+    visited_y = [t[1] for t in prev_spots]
 
-            if self._check_vertical(pos):
-                continue
+    def check_candidate(tup):
+        if tup[0] in visited_x or tup[1] in visited_y:
+            return False
 
-            if self._check_diagonal(pos):
-                continue
+        return check_diagonal(tup)
 
-            self.squares[pos] = True
-            return pos
-
-        return None
-
-    def permute(self):
-        self.clear_board()
+    candidates = filter(check_candidate, iter_squares())
+    return list(candidates)
 
 
-        for start_pos , _ in self.__iter__():
-            self.clear_board()
+def solve():
+    states_queue = deque([[s] for s in iter_squares()])
+    solutions = []
+    counter = 0
 
-            self.squares[start_pos] = True
+    while len(states_queue) > 0:
+        board_state = states_queue.pop()
 
-            spots = []
-            while (result:= self.add_queen()) is not None:
-                spots.append(result)
+        if len(board_state) > 7 and not set(board_state) in solutions:
 
-            yield spots
+            return board_state
+            solutions.append(set(board_state))
+            counter +=1
 
-
-
+            print(f"{counter} {board_state}")
             
 
+        new_candidates = get_candidate_spots(board_state)
+
+        if not new_candidates:
+            continue
+
+        states_queue.extend([board_state + [s] for s in new_candidates])
 
 
-board = Board()
-solutions = list(board.permute())
+def main():
+    solution = solve()
+    print(solution)
 
-solutions.sort(key=lambda x: len(x))
-solutions.reverse()
+if __name__ == '__main__':
+    main()
 
-print(solutions)
+
 
