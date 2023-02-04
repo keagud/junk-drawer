@@ -1,19 +1,25 @@
 /* 2023-02-04 */
 
+/* Simple Caeser cypher implementation */
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/any.hpp>
 #include <boost/program_options.hpp>
-#include <ios>
 #include <iostream>
+#include <iterator>
+#include <sstream>
 #include <string>
 #include <vector>
 
-using std::cin;
 using std::cout;
 using std::string;
+using std::vector;
 
 namespace po = boost::program_options;
 
+// shift a single letter by an int value
+// maintains case, ignores non-alphabetic characters
 char shift_letter(char original, int shift) {
 
   static const auto alpha_classifier = boost::algorithm::is_alpha();
@@ -30,9 +36,10 @@ char shift_letter(char original, int shift) {
   return (char)(shifted_value + shift_char);
 }
 
+// apply shift_letter to an entire string
 string cypher_shift(string message, int shift) {
 
-  std::vector<char> converted_chars{};
+  vector<char> converted_chars{};
 
   for (auto c : message) {
 
@@ -44,22 +51,46 @@ string cypher_shift(string message, int shift) {
 
 int main(int argc, char *argv[]) {
 
-  po::options_description description{
-      "cypher [options] message"};
+  int rotation{};
 
-  description.add_options()("rotation,r", po::value<int>(),
-                            "Amount to shift");
+  po::options_description description{"cypher [-r rotation] message"};
 
-  /*
-  string message = "What sphinx of cement and aluminum bashed open their "
-                   "skulls and ate up their brains and imaginations?";
+  description.add_options()("rotation,r",
+                            po::value<int>(&rotation)->default_value(13),
+                            "Amount to shift")(
+      "message", po::value<vector<string>>()->multitoken(), "input message");
 
+  po::positional_options_description positional{};
+  positional.add("message", -1);
 
-  string encoded = cypher_shift(message, 13);
+  po::command_line_parser parser{argc, argv};
 
-  string decoded = cypher_shift(encoded, 13);
+  parser.positional(positional);
 
-  cout << encoded << '\n';
-  cout << decoded << '\n';
-  */
+  parser.options(description);
+  auto parsed_input = parser.run();
+
+  po::variables_map vars{};
+
+  po::store(parsed_input, vars);
+  po::notify(vars);
+
+  if (vars["message"].empty()) {
+    std::cerr << "No message given\n";
+    std::exit(EXIT_FAILURE);
+  }
+
+  std::stringstream message_input{};
+  std::stringstream program_output{};
+
+  auto message_tokens_vec = vars["message"].as<vector<string>>();
+
+  std::copy(message_tokens_vec.begin(), message_tokens_vec.end() - 1,
+            std::ostream_iterator<string>(message_input, " "));
+
+  message_input << message_tokens_vec.back();
+
+  program_output << cypher_shift(message_input.str(), rotation);
+
+  cout << program_output.str() << std::endl;
 }
