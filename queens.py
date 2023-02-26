@@ -1,8 +1,7 @@
-from itertools import product
-from itertools import combinations_with_replacement
 from collections import deque
 from copy import deepcopy
 from functools import partial
+from itertools import combinations_with_replacement, product
 
 
 def iter_squares(board_size: int = 8):
