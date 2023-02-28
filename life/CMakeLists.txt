@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(life)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(Python  COMPONENTS Interpreter Development REQUIRED)
 find_package(Boost 1.65.1 COMPONENTS python REQUIRED)

@@ -1,3 +1,6 @@
 *.bin
 *.out
 *.o
+*vgcore*
+*.stat
+build/
