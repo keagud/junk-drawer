@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 3.16)
+project(life)
+
+set(CMAKE_CXX_STANDARD 14)
+
+find_package(Python  COMPONENTS Interpreter Development REQUIRED)
+find_package(Boost 1.65.1 COMPONENTS python REQUIRED)
+
+if(Boost_FOUND)
+    message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+    message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
+    message(STATUS "Boost_VERSION: ${Boost_VERSION}")
+    include_directories(${Boost_INCLUDE_DIRS})
+endif()
+if(Python_FOUND)
+    message(STATUS "Python Found: ${Python_EXECUTABLE}")
+    message(STATUS "Python Found: ${Python_INCLUDE_DIRS}")
+    message(STATUS "Python Found: ${Python_LIBRARIES}")
+    message(STATUS "Python Found: ${Python_LIBRARY_DIRS}")
+    include_directories(${Python_INCLUDE_DIRS})
+endif()
+
+add_library(life SHARED life.cpp)
+SET_TARGET_PROPERTIES(life PROPERTIES PREFIX "")
+if(Boost_FOUND)
+    target_link_libraries(life ${Boost_LIBRARIES} ${Python_LIBRARIES})
+endif()
