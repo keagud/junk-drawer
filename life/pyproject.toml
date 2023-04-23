@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "life"
+version = "0.1.0"
+description = "Conway's Game of Life in C++ and Python"
+authors = ["keagud <keagud@protonmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pybind11 = "^2.10.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

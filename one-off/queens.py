@@ -1,11 +1,8 @@
 from collections import deque
-from copy import deepcopy
-from functools import partial
 from itertools import combinations_with_replacement, product
 
 
 def iter_squares(board_size: int = 8):
-
     x_range = range(1, board_size + 1)
     y_range = range(1, board_size + 1)
     return product(x_range, y_range)
@@ -13,7 +10,6 @@ def iter_squares(board_size: int = 8):
 
 def get_candidate_spots(prev_spots: list[tuple[int, int]], board_size: int = 8):
     def diagonal_iter(anchor_pos):
-
         x_iter, y_iter = anchor_pos
         for x_step, y_step in combinations_with_replacement((-1, 1), 2):
             while (0 < x_iter <= board_size) and (0 < y_iter <= board_size):
@@ -50,14 +46,12 @@ def solve():
     while len(states_queue) > 0:
         board_state = states_queue.pop()
 
-        if len(board_state) > 7 and not set(board_state) in solutions:
-
+        if len(board_state) > 7 and set(board_state) not in solutions:
             return board_state
             solutions.append(set(board_state))
-            counter +=1
+            counter += 1
 
             print(f"{counter} {board_state}")
-            
 
         new_candidates = get_candidate_spots(board_state)
 
@@ -71,8 +65,6 @@ def main():
     solution = solve()
     print(solution)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
-
-
-
